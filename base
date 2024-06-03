@@ -1,0 +1,32 @@
+基于下面的信息，写一个方法get_company_info，输入参数company_name: str ，返回值 CompanyInfo。
+第二个方法search_company_name_by_info，输入参数key: str value: str，返回值 公司名称: str。
+并制造一些假数据。
+class CompanyInfo(Base):
+    __tablename__ = "company_info"
+    公司名称 = Column(Text, primary_key=True)
+    公司简称 = Column(Text)
+    英文名称 = Column(Text)
+    关联证券 = Column(Text)
+    公司代码 = Column(Text)
+    曾用简称 = Column(Text)
+    所属市场 = Column(Text)
+    所属行业 = Column(Text)
+    上市日期 = Column(Text)
+    法人代表 = Column(Text)
+    总经理 = Column(Text)
+    董秘 = Column(Text)
+    邮政编码 = Column(Text)
+    注册地址 = Column(Text)
+    办公地址 = Column(Text)
+    联系电话 = Column(Text)
+    传真 = Column(Text)
+    官方网址 = Column(Text)
+    电子邮箱 = Column(Text)
+    入选指数 = Column(Text)
+    主营业务 = Column(Text)
+    经营范围 = Column(Text)
+    机构简介 = Column(Text)
+    每股面值 = Column(Text)
+    首发价格 = Column(Text)
+    首发募资净额 = Column(Text)
+    首发主承销商 = Column(Text)

@@ -29,10 +29,12 @@ register_list = [
 ]
 
 def search_company_name_by_register(key: str, value: str):
+    matching_company_names = []
     for json_str in register_list:
         company_data = json.loads(json_str)
         if company_data.get(key) == value:
-            return company_data.get("公司名称")
+            matching_company_names.append(company_data.get("公司名称"))
+    return matching_company_names
 
 def get_company_register(company_name: str):
 
@@ -49,11 +51,16 @@ subCompany_list = [
     """{"关联上市公司股票代码": "600005", "关联上市公司股票简称": "沪能集团", "关联上市公司全称": "上海能源集团有限公司", "上市公司关系": "子公司", "上市公司参股比例": "65%", "上市公司投资金额": "6500万元", "公司名称": "沪能环保科技有限公司"}"""
 ]
 
+
+
 def search_company_name_by_sub_info(key: str, value: str):
+    matching_company_names = []
     for json_str in subCompany_list:
         company_data = json.loads(json_str)
         if company_data.get(key) == value:
-            return company_data.get("公司名称")
+            matching_company_names.append(company_data.get("公司名称"))
+    return matching_company_names
+
 
 def get_sub_company_info(company_name: str):
     for json_str in subCompany_list:
@@ -170,11 +177,15 @@ legal_document_list = [
 
 
 def search_case_num_by_legal_document(key: str, value: str):
+    matching_case_numbers = []
     for document_data in legal_document_list:
         if document_data.get(key) == value:
-            return document_data.get("案号")
+            matching_case_numbers.append(document_data.get("案号"))
+    return matching_case_numbers
+
 
 def get_legal_document(case_num: str):
+
     for legal_document in legal_document_list:
         if legal_document.get("案号") == case_num:
             return legal_document

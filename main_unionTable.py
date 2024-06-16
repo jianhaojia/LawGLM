@@ -6,8 +6,8 @@ from baseUrl.offical_base import search_company_name_by_info, get_company_info, 
 from baseUrl.enhandtool import enhandceAndCall
 from openai import OpenAI
 import asyncio
-client = ZhipuAI(api_key="2d3d32ad1b8f449350b7cb116fb660a8.oypKBRVj4EpoE21B") # 请填写您自己的APIKey
-# client = ZhipuAI(api_key="b5326e1ab6af07dd4a19d773ff3ee559.HWoRQ6Jlo9tUJvbR") # 请填写您自己的APIKey
+client = ZhipuAI(api_key="") # 请填写您自己的APIKey
+# client = ZhipuAI(api_key="") # 请填写您自己的APIKey
 
 #属性名和只，
 tools = [

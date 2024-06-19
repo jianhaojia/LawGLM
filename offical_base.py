@@ -349,6 +349,7 @@ def getNumOfCompanyBykeyValue(key,value):
     formatted_list = [{'公司名称': company_name} for company_name in all_companies]
     num_elements = len(formatted_list)
     print(num_elements)
+    print(all_companies)
     return f"""有相关信息{str(formatted_list)}，通过计算,已经确定我们想知道的公司数量是{num_elements},"""
 
 # getNumOfCompanyBykeyValue('所属行业','通用设备制造业')
@@ -370,6 +371,7 @@ def getComanyInfoByKeyValue(key,value,requirements):
         a.append(company_name)
     result=getCompanyInfoByCompanyNameList(a,requirements)
     return result
+
 """"公司名称", "公司简称", "英文名称", "关联证券", "公司代码", "曾用简称", "所属市场", "所属行业", "上市日期",
     "法人代表", "总经理","董秘", "邮政编码", "注册地址", "办公地址", "联系电话", "传真", "官方网站", "电子邮箱",
     "入选指数", "主营业务", "经营范围","机构简介", "每股面值", "首发价格", "首发募资净额", "首发主承销商" """
@@ -391,26 +393,85 @@ def is_valid_list(lst):
         return False
 
     return True
+
+def is_english_string(s):
+    allowed_chars = set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz .,!?;:'\"-()[]{}0123456789")
+    return all(c in allowed_chars for c in s)
+
+
+def is_invalid_return(result, requirement):
+    # 判断是否为空列表或者嵌套空列表
+    if result == [] or result == [[]]:
+        return True
+
+    # 判断特定结构的无效返回
+    if isinstance(result, list) and len(result) >= 2:
+        # 第一个元素是公司名称和参股比例
+        first_element_valid = isinstance(result[0], dict) and '公司名称' in result[0] and '上市公司参股比例' in result[0]
+
+        # 后续元素是requirement的值和None
+        remaining_elements_valid = all(
+            isinstance(element, tuple) and len(element) == 2 and element[1] is None for element in result[1:])
+
+        # 从requirement的第二个元素开始检查
+        requirement_match = all(element[0] == req for element, req in zip(result[1:], requirement[1:]))
+
+        if first_element_valid and remaining_elements_valid and requirement_match:
+            return True
+
+    # 如果不满足无效返回的任何一种情况，则认为是有效返回
+    return False
+
+
+
+""""公司名称", "公司简称", "英文名称", "关联证券", "公司代码", "曾用简称", "所属市场", "所属行业", "上市日期",
+    "法人代表", "总经理","董秘", "邮政编码", "注册地址", "办公地址", "联系电话", "传真", "官方网站", "电子邮箱",
+    "入选指数", "主营业务", "经营范围","机构简介", "每股面值", "首发价格", "首发募资净额", "首发主承销商" """
+
+
+"""["公司名称", "登记状态", "统一社会信用代码", "注册资本", "成立日期",
+ "省份", "城市", "区县", "注册号", "组织机构代码", "参保人数", "企业类型", "曾用名"]"""
+
+"""关联上市公司股票代码", "关联上市公司股票简称", "关联上市公司全称", "上市公司关系", "上市公司参股比例", "上市公司投资金额", "公司名称"""
+
+"标题,案号,文书类型,原告,被告,原告律师,被告律师,案由,审理法条依据,涉案金额,判决结果,胜诉方,文件名"
+
 def getComanyListInfoByKeyValueList(keyValueList,requirements):
-    a=[]
+    a=set()
+    tempresult=''
     for key,value in keyValueList:
         temp = getComanyInfoByKeyValue(key, value, requirements)
-        if key=='公司名称' and len(value)==4:
-            temp = getComanyInfoByKeyValue('关联上市公司股票简称', value, requirements)
-            temp2 = getComanyInfoByKeyValue('公司简称', value, requirements)
-            temp3 = getComanyInfoByKeyValue('曾用简称', value, requirements)
-            temp=merge_dicts(temp,temp2,temp3)
-        a.append(temp)
-        if key=='公司名称' and is_valid_list(a):
-            temp = getComanyInfoByKeyValue('关联上市公司全称', value, requirements)
-            temp2 = getComanyInfoByKeyValue('曾用名', value, requirements)
-            temp=merge_dicts(temp,temp2)
-        a.append(temp)
+        if (key=='公司名称' or  key == '关联上市公司全称') and len(value)<=4:
+            b=['关联上市公司股票简称','公司简称','曾用简称','曾用名']
+            c = set()
+            for case in b:
+                temp = getComanyInfoByKeyValue(case,value, requirements)
+                if(is_invalid_return(temp,requirements)):
+                    c = merge_dicts(c, temp)
+
+
+        if key=='公司名称' and is_invalid_return(key, requirements):
+                temp = getComanyInfoByKeyValue('关联上市公司全称', value, requirements)
+
+        if is_english_string(value) :
+            temp2 = getComanyInfoByKeyValue('英文名称', value, requirements)
+            temp=merge_dicts(temp2)
+
+        a = merge_dicts(a,temp)
 
     print("接口返回")
     print(a)
     return a
-
+# a=getComanyInfoByKeyValue('英文名称', "Tianyang New Materials (Shanghai) Technology Co., Ltd.", ["公司名称","上市公司参股比例"])
+# print(a)
+print(str(is_invalid_return(a,["公司名称","上市公司参股比例"])))
+a=getComanyListInfoByKeyValueList([["英文名称","Tianyang New Materials (Shanghai) Technology Co., Ltd."]],["关联上市公司股票代码","关联上市公司股票简称","关联上市公司全称","上市公司关系","上市公司参股比例"])
+print(a)
+print(str(is_invalid_return(a,["公司名称","上市公司参股比例"])))
+# getComanyListInfoByKeyValueList([["关联上市公司全称","Tianyang New Materials (Shanghai) Technology Co., Ltd."]],["关联上市公司股票代码","关联上市公司股票简称","关联上市公司全称","上市公司关系","上市公司参股比例"])
+# a=get_sub_company_info("安睿智达（成都）科技有限公司")
+# a= getComanyInfoByKeyValue('公司名称', "安睿智达（成都）科技有限公司", ["关联上市公司全称"])
+# print(a)
 def search_case_num_by_legal_document(key: str, value: str):
     finallurl=urljoin(url,'search_case_num_by_legal_document')
     data = {
@@ -461,22 +522,25 @@ def getlegaldocument(key: str, value: str):
     print(result)
     return result
 
-
+"标题,案号,文书类型,原告,被告,原告律师,被告律师,案由,审理法条依据,涉案金额,判决结果,胜诉方,文件名"
 def getCaseListInfoByKeyValueList(keyValueList,requirements):
-    a=[]
+    a=set()
     for key,value in keyValueList:
         cases = search_case_num_by_legal_document(key, value)
-        a.append(cases)
+        temp=merge_dicts(cases)
+        a=merge_dicts(temp)
     data_list = []
+    print(a)
     for item in a:
         for key, value in item.items():
             temp = get_legal_document(value)
             data_list.append(temp)  # 获取每个公司名称对应的数据字典
             result=process_data(data_list, keys=requirements,default_key='案号')
+    print("接口返回")
     print(result)
     return result
 
-
+# getCaseListInfoByKeyValueList([["被告","九牧王股份有限公司"]],["原告律师","案号"])
 def getNumOfCaseByKeyValue(key,value):
 
     cases = search_case_num_by_legal_document(key, value)
@@ -501,6 +565,7 @@ def getNumOfCaseByKeyValue(key,value):
 # getCompanyNameByKeyValue('公司名称','劲拓股份')
 # a=getCompanyInfoByCompanyNameList(["药店龙头公司","益丰药房"],['注册资本'])
 
+# a=search_company_name_by_info('英文名称','Beijing Comens New Materials Co., Ltd.')
 """"公司名称", "公司简称", "英文名称", "关联证券", "公司代码", "曾用简称", "所属市场", "所属行业", "上市日期",
     "法人代表", "总经理","董秘", "邮政编码", "注册地址", "办公地址", "联系电话", "传真", "官方网站", "电子邮箱",
     "入选指数", "主营业务", "经营范围","机构简介", "每股面值", "首发价格", "首发募资净额", "首发主承销商" """
@@ -513,7 +578,7 @@ def getNumOfCaseByKeyValue(key,value):
 
 "标题,案号,文书类型,原告,被告,原告律师,被告律师,案由,审理法条依据,涉案金额,判决结果,胜诉方,文件名"
 
-a=0
+
     # a=get_company_info("劲拓股份")
     # print(a)
     # search_company_name_by_info("公司名称","广州发展集团股份有限公司")
